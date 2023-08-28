@@ -1,6 +1,6 @@
 personasConSuenios(gabriel,loteria(5)).
 personasConSuenios(gabriel,loteria(9)).
-personasConSuenios(gabriel,arsenal).
+personasConSuenios(gabriel,futbolista(arsenal)).
 personasConSuenios(juan,cantante(100000)).
 personasConSuenios(macarena,cantante(10000)).
 
@@ -28,9 +28,11 @@ dificultad(loteria(Numeros), Dificultad) :-
   Dificultad is 10 * Numeros.
 dificultad(cantante(Ventas), Dificultad) :-
   (Ventas > 500000 -> Dificultad is 6; Dificultad is 4).
-dificultad(arsenal,3).
-dificultad(aldosivi,3).
-dificultad(_, 16).
+dificultad(futbolista(Equipo),Dificultad):-
+  (Equipo is arsenal ->Dificultad is 3),
+  (Equipo is aldosivi ->Dificultad is 3).
+dificultad(futbolista(_),Dificultad):-
+  Dificultad is 16.
 
 tieneQuimica(campanita, Persona) :-
   creencias(Persona, campanita),
@@ -54,3 +56,8 @@ creenciaPura(futbolista(Equipo)) :-
     Dificultad =< 3.
 creenciaPura(cantante(Ventas)) :-
     Ventas =< 200000.
+
+
+% personajeAlegraAunaPersona(Personaje,Persona):-
+%   personasConSuenios(Persona,_),
+
