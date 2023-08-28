@@ -1,28 +1,56 @@
-% Viajes
-
-% Tipos de transporte
-
-viajes(charly,avion).  % no defini que charly no viaja en tren, porque eso no me aporta informacion sobre en que viaja charly.
-viajes(vilmaPalma,auto). % no le agregue vilmaPalma ni el color ni la hora porque no es algo que se use despues.
-viajes(arbol,trenes). % arbol tiene 3 tipos de transportes , y los defini en hechos distintos.
-viajes(arbol,camiones).
-viajes(arbol,tractor).
-viajes(zapatoVeloz,tractor). % no defini el color del tractor, porque no es algo que se use despues.
-%viajes(indio,auto). como no tiene a donde ir , entonces por concepto de universo cerrado, todo lo desconocido es falso
-%viajes(manuChao,_).como no se marca en que transporte va  , entonces por concepto de universo cerrado, todo lo desconocido es falso
-viajes(virus,taxi). % basicamente defini el transporte como lo marcaba el enunciado, obviando 'hotel Savoy y bailamos' porque no es algo que
-%se use despues.
+personasConSuenios(gabriel,loteria(5)).
+personasConSuenios(gabriel,loteria(9)).
+personasConSuenios(gabriel,arsenal).
+personasConSuenios(juan,cantante(100000)).
+personasConSuenios(macarena,cantante(10000)).
 
 
-% Chetos
+% no se agrega a diego a la base de conocimiento por concepto de universo cerrado.
 
-chetosViajando(PersonaNueva):-viajes(PersonaNueva,taxi).
-chetosViajando(PersonaNueva):-viajes(PersonaNueva,avion).
+creencias(gabriel,campanita).
+creencias(gabriel,magoDeOz).
+creencias(gabriel,cavenaghi).
+creencias(juan,conejoDePascua).
+creencias(macarena,reyesMagos).
+creencias(macarena,magoCapria).
+creencias(macarena,campanita).
 
+personaAmbiciosa(Persona):-
+  dificultadesDeSusSuenios(Persona,Total),
+  Total > 20.
 
-%Gustos similares
+dificultadesDeSusSuenios(Persona,Total):-
+    personasConSuenios(Persona,Suenio),
+    dificultad(Suenio,DificultadTotal),
+    Total is DificultadTotal.
 
-personasDistintas(Persona1,Persona2):-Persona1 \= Persona2.
+dificultad(loteria(Numeros), Dificultad) :-
+  Dificultad is 10 * Numeros.
+dificultad(cantante(Ventas), Dificultad) :-
+  (Ventas > 500000 -> Dificultad is 6; Dificultad is 4).
+dificultad(arsenal,3).
+dificultad(aldosivi,3).
+dificultad(_, 16).
 
-tienenGustosSimilares(Persona1,Persona2):-personasDistintas(Persona1,Persona2),viajes(Persona1,Transporte),
-viajes(Persona2,Transporte).
+tieneQuimica(campanita, Persona) :-
+  creencias(Persona, campanita),
+  personasConSuenios(Persona, Suenio),
+  dificultad(Suenio, Dificultad),
+  Dificultad < 5.
+
+tieneQuimica(Personaje, Persona) :-
+    Personaje \= campanita,
+    creencias(Persona, Personaje),
+    todasLasCreenciasSonPuras(Persona),
+    not(personaAmbiciosa(Persona)).
+
+  % Verificar si todas las creencias son puras (futbolista o cantante < 200.000 discos)
+todasLasCreenciasSonPuras(Persona) :-
+  creencias(Persona, _),
+  forall(creencias(Persona, Creencia), creenciaPura(Creencia)).
+
+creenciaPura(futbolista(Equipo)) :-
+    dificultad(futbolista(Equipo), Dificultad),
+    Dificultad =< 3.
+creenciaPura(cantante(Ventas)) :-
+    Ventas =< 200000.
