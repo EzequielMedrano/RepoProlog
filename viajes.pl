@@ -1,28 +1,127 @@
-% Viajes
+% jugadores conocidos
+jugador(maradona).
+jugador(chamot).
+jugador(balbo).
 
-% Tipos de transporte
+jugador(caniggia).
+jugador(passarella).
+jugador(pedemonti).
+jugador(basualdo).
 
-viajes(charly,avion).  % no defini que charly no viaja en tren, porque eso no me aporta informacion sobre en que viaja charly.
-viajes(vilmaPalma,auto). % no le agregue vilmaPalma ni el color ni la hora porque no es algo que se use despues.
-viajes(arbol,trenes). % arbol tiene 3 tipos de transportes , y los defini en hechos distintos.
-viajes(arbol,camiones).
-viajes(arbol,tractor).
-viajes(zapatoVeloz,tractor). % no defini el color del tractor, porque no es algo que se use despues.
-%viajes(indio,auto). como no tiene a donde ir , entonces por concepto de universo cerrado, todo lo desconocido es falso
-%viajes(manuChao,_).como no se marca en que transporte va  , entonces por concepto de universo cerrado, todo lo desconocido es falso
-viajes(virus,taxi). % basicamente defini el transporte como lo marcaba el enunciado, obviando 'hotel Savoy y bailamos' porque no es algo que
-%se use despues.
+% relaciona lo que toma cada jugador
+tomo(maradona, sustancia(efedrina)).
+tomo(maradona, compuesto(cafeVeloz)).
+tomo(caniggia, producto(cocacola, 2)).
+tomo(chamot, compuesto(cafeVeloz)).
+tomo(balbo, producto(gatoreit, 2)).
+% relaciona la máxima cantidad de un producto que 1 jugador puede ingerir
+maximo(cocacola, 3).
+maximo(gatoreit, 1).
+maximo(naranju, 5).
+
+% relaciona las sustancias que tiene un compuesto
+composicion(cafeVeloz, [efedrina, ajipupa, extasis, whisky, cafe]).
+
+% sustancias prohibidas por la asociación
+sustanciaProhibida(efedrina).
+sustanciaProhibida(cocaina).
 
 
-% Chetos
 
-chetosViajando(PersonaNueva):-viajes(PersonaNueva,taxi).
-chetosViajando(PersonaNueva):-viajes(PersonaNueva,avion).
+amigo(maradona, caniggia).
+amigo(caniggia, balbo).
+
+amigo(balbo, chamot).
+amigo(balbo, pedemonti).
+
+%Agregamos ahora la lista de médicos que atiende a cada jugador
+atiende(cahe, maradona).
+atiende(cahe, chamot).
+atiende(cahe, balbo).
+
+atiende(zin, caniggia).
+atiende(cureta, pedemonti).
+atiende(cureta, basualdo).
 
 
-%Gustos similares
+nivelFalopez(efedrina, 10).
+nivelFalopez(cocaina, 100).
 
-personasDistintas(Persona1,Persona2):-Persona1 \= Persona2.
+nivelFalopez(extasis, 120).
+nivelFalopez(omeprazol, 5).
 
-tienenGustosSimilares(Persona1,Persona2):-personasDistintas(Persona1,Persona2),viajes(Persona1,Transporte),
-viajes(Persona2,Transporte).
+%%%%%%%%%%%% PUNTO 1 %%%%%%%%%%%%%
+
+tomo(passarella,LoQueToma):-not(tomo(maradona,LoQueToma)).
+
+tomo(pedemonti,LoQueToma):- tomo(chamot,LoQueToma).
+tomo(pedemonti,LoQueToma):- tomo(maradona,LoQueToma).
+
+%por concept de universo cerrado no agrego un a basualdo.
+
+%%%%%%%%%%%% PUNTO 2 %%%%%%%%%%%%%
+puedeSerSuspendido(Jugador):- %% tomo(maradona, sustancia(efedrina)). sustanciaProhibida(efedrina).
+tomo(Jugador,LoQueToma),
+  forall(tomo(Jugador,LoQueToma),tomaUnaSustanciaProhibida(LoQueToma)).
+
+tomaUnaSustanciaProhibida(sustancia(Tipo)):-sustanciaProhibida(Tipo).
+
+
+puedeSerSuspendido(Jugador):- %%tomo(chamot, compuesto(cafeVeloz)). composicion(cafeVeloz, [efedrina, ajipupa, extasis, whisky, cafe]).
+  tomo(Jugador,LoQueToma),
+  forall(tomo(Jugador,LoQueToma),compuestoQueTieneUnaSustanciaProhibida(LoQueToma)).
+
+compuestoQueTieneUnaSustanciaProhibida(compuesto(CompuestoPor)):-
+composicion(CompuestoPor,Ingredientes),
+sustanciaProhibida(Ingrediente),
+member(Ingrediente,Ingredientes).
+
+%   % forall(composicion(CompuestoPor,Ingredientes),member(sustanciaProhibida(Ingrediente),Ingredientes)).
+
+puedeSerSuspendido(Jugador):-
+  tomo(Jugador,LoQueToma),
+  forall(tomo(Jugador,LoQueToma),seExcedeDelLimiteEstablecido(LoQueToma)).
+
+seExcedeDelLimiteEstablecido(producto(Tipo,Cantidad)):-
+  maximo(Tipo,CantidadEstablecida),
+  Cantidad > CantidadEstablecida. %% este funciona bien.
+
+  %%%%%%%% PUNTO 3 %%%%%%%%
+
+malaInfluencia(Jugador,JugadorInfluenciado):-
+  amigo(Jugador,JugadorInfluenciado).
+   puedeSerSuspendido(Jugador),
+   puedeSerSuspendido(JugadorInfluenciado).
+% malaInfluencia(Jugador,JugadorTransitivo):-
+%   puedeSerSuspendido(Jugador),
+%   puedeSerSuspendido(JugadorInfluenciado),
+%   amigo(Jugador,JugadorInfluenciado),
+%   amigo(JugadorInfluenciado,JugadorTransitivo).
+
+
+  %%%%%%%% PUNTO 4 %%%%%%%%
+  chanta(Medico):- %%atiende(cureta, pedemonti). atiende(cureta, basualdo).
+    atiende(Medico,Jugador), %% atiende(cahe, balbo).
+    forall(atiende(Medico,Jugador),puedeSerSuspendido(Jugador)).
+
+  %% atiende(cureta, pedemonti). esta bien que la consola devuelva a cureta, porque cureta tambien atiende a un jugador que 
+  %% puede ser suspendido, porque si maradona puede ser suspendido, y maradona esta incluido en lo que pedemonti , entonces es un jugador 
+  %% que puede ser suspendido.
+
+  %%%%%%%% PUNTO 5 %%%%%%%%
+
+cuantaFalopaTiene(Jugador,Cantidad):-
+  tomo(Jugador,LoQueToma),
+  findall(Nivel,nivelDeFalopezDelJugador(LoQueToma,Nivel),ListaDeNiveles),
+  sum_list(ListaDeNiveles, TotalidadDeFalopez),
+  Cantidad is TotalidadDeFalopez.
+
+%  nivelDeFalopezDelJugador(sustancia(Tipo),Total):-  %%tomo(maradona, sustancia(efedrina)).
+%    nivelFalopez(Tipo,Total).
+
+nivelDeFalopezDelJugador(compuesto(Tipo),Total):- %%tomo(maradona, compuesto(cafeVeloz)) , nivelFalopez(omeprazol, 5).
+ composicion(Tipo,Ingredientes), %% composicion(cafeVeloz, [efedrina, ajipupa, extasis, whisky, cafe]).
+ findall(AlteracionEnSangre,nivelFalopez(Tipo,AlteracionEnSangre),TotalidadDeLaAltericion),
+ sum_list(TotalidadDeLaAltericion,Total).
+
+%% los productos al tener nivel de alteracion = 0 , entonces no altera en nada a la sangre, entonces por universo cerrado , no lo agrego.
