@@ -92,11 +92,7 @@ malaInfluencia(Jugador,JugadorInfluenciado):-
   amigo(Jugador,JugadorInfluenciado).
    puedeSerSuspendido(Jugador),
    puedeSerSuspendido(JugadorInfluenciado).
-% malaInfluencia(Jugador,JugadorTransitivo):-
-%   puedeSerSuspendido(Jugador),
-%   puedeSerSuspendido(JugadorInfluenciado),
-%   amigo(Jugador,JugadorInfluenciado),
-%   amigo(JugadorInfluenciado,JugadorTransitivo).
+
 
 
   %%%%%%%% PUNTO 4 %%%%%%%%
@@ -112,16 +108,16 @@ malaInfluencia(Jugador,JugadorInfluenciado):-
 
 cuantaFalopaTiene(Jugador,Cantidad):-
   tomo(Jugador,LoQueToma),
-  findall(Nivel,nivelDeFalopezDelJugador(LoQueToma,Nivel),ListaDeNiveles),
-  sum_list(ListaDeNiveles, TotalidadDeFalopez),
-  Cantidad is TotalidadDeFalopez.
+ findall(Nivel,(nivelDeFalopezDelJugador(LoQueToma,Nivel)),ListaDeNiveles),
+ sum_list(ListaDeNiveles,Cantidad).
 
-%  nivelDeFalopezDelJugador(sustancia(Tipo),Total):-  %%tomo(maradona, sustancia(efedrina)).
-%    nivelFalopez(Tipo,Total).
+ nivelDeFalopezDelJugador(sustancia(Tipo),Total):-  %%tomo(maradona, sustancia(efedrina)).
+   nivelFalopez(Tipo,Total).
 
 nivelDeFalopezDelJugador(compuesto(Tipo),Total):- %%tomo(maradona, compuesto(cafeVeloz)) , nivelFalopez(omeprazol, 5).
- composicion(Tipo,Ingredientes), %% composicion(cafeVeloz, [efedrina, ajipupa, extasis, whisky, cafe]).
- findall(AlteracionEnSangre,nivelFalopez(Tipo,AlteracionEnSangre),TotalidadDeLaAltericion),
+ composicion(Tipo,Ingredientes),
+ member(Ingrediente,Ingredientes), %% composicion(cafeVeloz, [efedrina, ajipupa, extasis, whisky, cafe]).nivelFalopez(extasis, 120).
+ findall(AlteracionEnSangre,(nivelFalopez(Ingrediente,AlteracionEnSangre)),TotalidadDeLaAltericion),
  sum_list(TotalidadDeLaAltericion,Total).
 
 %% los productos al tener nivel de alteracion = 0 , entonces no altera en nada a la sangre, entonces por universo cerrado , no lo agrego.
